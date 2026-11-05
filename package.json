@@ -1,0 +1,27 @@
+{
+  "name": "v4revert",
+  "version": "0.1.0",
+  "description": "Decode Uniswap v4 revert data: recursively unwraps WrappedError, zero dependencies",
+  "bin": {
+    "v4revert": "v4revert.js"
+  },
+  "main": "v4revert.js",
+  "files": [
+    "v4revert.js"
+  ],
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "uniswap",
+    "uniswap-v4",
+    "hooks",
+    "revert",
+    "ethereum",
+    "solidity",
+    "evm",
+    "debugging"
+  ],
+  "license": "MIT",
+  "repository": "github:zhouxingchi1017/v4revert"
+}
