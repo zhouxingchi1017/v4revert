@@ -113,12 +113,16 @@ const word = (data, off) => {
 };
 const uint = (buf) => BigInt('0x' + buf.toString('hex'));
 
-function readParam(type, data, slot) {
+function readParam(type, data, slot, headSize) {
   const w = word(data, slot * 32);
   if (type === 'bytes' || type === 'string') {
-    const off = Number(uint(w));
-    const len = Number(uint(word(data, off)));
-    if (off + 32 + len > data.length) throw new Error('truncated');
+    const offset = uint(w);
+    if (offset < BigInt(headSize) || offset % 32n !== 0n
+      || offset + 32n > BigInt(data.length)) throw new Error('invalid offset');
+    const off = Number(offset);
+    const length = uint(word(data, off));
+    if (length > BigInt(data.length - off - 32)) throw new Error('truncated');
+    const len = Number(length);
     const raw = data.subarray(off + 32, off + 32 + len);
     return type === 'string' ? raw.toString('utf8') : raw;
   }
@@ -133,7 +137,13 @@ function readParam(type, data, slot) {
 
 // Returns a tree: { name, args: [{ name, value }], raw? }; unknown or malformed data stays raw hex.
 function decode(data, extra = []) {
-  const buf = Buffer.isBuffer(data) ? data : Buffer.from(String(data).trim().replace(/^0x/, ''), 'hex');
+  let buf;
+  if (Buffer.isBuffer(data)) buf = data;
+  else {
+    const input = String(data).trim().replace(/^0x/, '');
+    if (!/^([0-9a-fA-F]{2})*$/.test(input)) throw new Error('input is not hex revert data');
+    buf = Buffer.from(input, 'hex');
+  }
   const hex = '0x' + buf.toString('hex');
   if (buf.length === 0) return { name: 'empty', args: [] };
   if (buf.length < 4) return { name: 'unknown', raw: hex, args: [] };
@@ -142,7 +152,7 @@ function decode(data, extra = []) {
   const body = buf.subarray(4);
   try {
     const args = known.params.map((p, i) => {
-      const value = readParam(p.type, body, i);
+      const value = readParam(p.type, body, i, known.params.length * 32);
       return { name: p.name, value: p.type === 'bytes' ? decode(value, extra) : value };
     });
     return { name: known.name, args };
