@@ -10,7 +10,7 @@
     "v4revert.js"
   ],
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js && node --test test-validation.js"
   },
   "keywords": [
     "uniswap",

@@ -33,10 +33,14 @@ const { decode, render } = require('v4revert');
 console.log(render(decode(revertData, ['WalletCap(uint256 cap)'])));
 ```
 
+`decode` accepts a Buffer or an even-length hex string, optionally prefixed with
+`0x`. Invalid hex strings throw an error. Valid hex containing malformed ABI data
+is returned with the original bytes in `raw`.
+
 ## Test
 
 ```bash
-node test.js
+npm test
 ```
 
 ## License
